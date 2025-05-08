@@ -1,6 +1,6 @@
 {
     "name": "vanilla-rte",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "I tried making a [Rich Text-Editor] based on Vanilla-JS.",
     "main": "index.js",
     "directories": {
