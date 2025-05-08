@@ -1,0 +1,36 @@
+{
+    "name": "vanilla-rte",
+    "version": "1.0.0",
+    "description": "I tried making a [Rich Text-Editor] based on Vanilla-JS.",
+    "main": "index.js",
+    "directories": {
+        "test": "test"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "terser src/index.js --compress --mangle --output dist/vanilla-rte.min.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/dosyaburi19/VANILLA-RTE.git"
+    },
+    "keywords": [
+        "Rich",
+        "Text",
+        "Editor"
+    ],
+    "author": "dosyaburi19",
+    "license": "MIT",
+    "types": "./index.d.ts",
+    "bugs": {
+        "url": "https://github.com/dosyaburi19/VANILLA-RTE/issues"
+    },
+    "homepage": "https://github.com/dosyaburi19/VANILLA-RTE#readme",
+    "files": [
+        "index.js",
+        "README.md",
+        "README.ko.md",
+        "README.ja.md",
+        "LICENSE"
+    ]
+}

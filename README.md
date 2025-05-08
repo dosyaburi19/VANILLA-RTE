@@ -2,7 +2,11 @@
 
 I tried making a [Rich Text-Editor] based on Vanilla-JS.
 
-# Introduction
+## Languages
+
+[日本語](README.ja.md) | [한국어](README.ko.md)
+
+## Introduction
 
 Hello, I'm dosyaburi19.
 This is my very first library, and I sincerely thank you for using it!
@@ -13,54 +17,117 @@ It might not be perfect yet, but I plan to add more features in the future to ma
 
 P.S. I'm not very good at English (currently using a translator).
 
-# Installation
+## Installation
 
 ```bash
 npm install vanilla-rte
 ```
 
----
+## Usage
 
-# VANILLA-RTE
+VANILLA-RTE is a utility function type library **without** a separate initialization function like `createEditor`. It is used by connecting directly to elements with the `contentEditable` attribute in HTML.
 
-Vanilla JS をベースにして、リッチテキストエディタを作ってみました。
+### Including the Library
 
-# イントロダクション
+How to include the library in your project. Choose according to the method of providing the built JavaScript file.
 
-こんにちは。dosyaburi19 です。
-このライブラリは私の初めてのライブラリです。ご利用いただきありがとうございます。
+**Option 1: Using `<script>` Tag (Simplest Method)**
 
-まず、このライブラリは Vanilla JS のみで構成されており、他のライブラリへの依存性はありません。
-
-まだ不十分な点があるかもしれませんが、今後機能を追加してさらに完成度を高めていきたいと思います。
-
-追伸) 日本語が苦手です。(翻訳機を使っています...)
-
-# インストール
-
-```bash
-npm install vanilla-rte
+```html
+<script src="path/to/your/vanilla-rte.min.js"></script>
 ```
 
----
+_Using this method makes the enrichText and onDeleteKeyUpProtectedLine functions available globally._
 
-# VANILLA-RTE
+**Option 2: Using a Module Bundler (Common when installed via npm)**
 
-Vanilla-JS 기반으로 리치 텍스트 에디터를 만들어 보았습니다.
+```javascript
+// Import and use in your JavaScript or TypeScript file
+import { enrichText, onDeleteKeyUpProtectedLine } from "vanilla-rte";
+```
 
-# 소개
+### Core Functions
 
-안녕하세요. dosyaburi19 입니다.
-제 첫 라이브러리이고, 사용해주서셔 정말 감사합니다.
+This library provides the following functions that operate on `contentEditable` elements and the current selection.
 
-먼저, 이 라이브러리는 오직 vanilla JavaScript 로 만들었으며, 외부 의존성이 없는 라이브러리입니다.
+#### `enrichText(styleName: string, styleValue: string);`
 
-아직 완벽하지는 않지만, 앞으로 기능 추가를 하여 더욱 완성도 높은 라이브러리로 만들겠습니다.
+-   **Role:** Applies CSS style to the **currently dragged (selected) text range** within an element with the `contentEditable` attribute.
+-   **Operation Method:** After wrapping the dragged text with a `<span>` tag, directly applies the specified CSS property (`styleName`) and value (`styleValue`) to that `<span>` tag.
+-   **Parameters:**
+    -   `styleName` (string): CSS property name to apply (e.g., `"color"`, `"font-size"`, `"font-weight"`).
+    -   `styleValue` (string): CSS property value to apply (e.g., `"#FF0000"`, `"34px"`, `"bold"`).
+-   **How to Use:** Typically used by calling this function from button click event handlers, etc., after selecting text. You do not need to pass the target `contentEditable` div element separately when calling this function. (It operates on the currently active/selected `contentEditable` area.)
 
-감사합니다.
+#### `onDeleteKeyUpProtectedLine(event: KeyboardEvent);`
 
-# 인스톨
+-   **Role:** When the Delete or Backspace key is pressed, it helps maintain the stable structure of the editor by preventing certain structures (e.g., empty `<div><br></div>` like default line structures) within an element with the `contentEditable` attribute from being damaged. It resolves common issues when using `contentEditable`.
+-   **Parameters:**
+    -   `event` (KeyboardEvent): Keyboard event object passed from the `onkeyup` event handler. This function must receive the event object as an argument.
+-   **How to Use:** You **must manually assign** this function as the `onkeyup` event handler for **each** `contentEditable` div element where you want to apply this protective feature.
 
-```bash
-npm install vanilla-rte
+### Full Example
+
+The following is a complete example code showing how to set up HTML, include the library, and actually connect and use the main functions. Through this example, you can understand the basic usage flow of VANILLA-RTE.
+
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>VANILLA-RTE Usage Example</title>
+        <meta charset="utf-8" />
+        <style>
+            #rich-text-editor {
+                border: 1px solid #ccc;
+                padding: 10px;
+                min-height: 150px; /* Set minimum height */
+                /* Visual indicator when the editor area is focused (Optional) */
+                outline: none;
+                /* Adjust default <br> height with line-height etc. */
+                line-height: 1.5;
+            }
+            /* Note: enrichText applies inline style by default. */
+            /* You can modify the library to apply CSS classes if needed. */
+        </style>
+    </head>
+    <body>
+        <h1>VANILLA-RTE Demo</h1>
+
+        <button id="btn-red-color">Apply Red Color</button>
+        <button id="btn-bold">Apply Bold</button>
+        <button id="btn-large-font">Apply Large Font (34px)</button>
+
+        <hr />
+        <h2>Editor Area</h2>
+        <div id="rich-text-editor" contenteditable="true">
+            <div>Enter content here.</div>
+            <div>**Drag** the text and click the buttons above.</div>
+        </div>
+
+        <script src="path/to/your/vanilla-rte.min.js"></script>
+        <script>
+            // This script assumes enrichText and onDeleteKeyUpProtectedLine are globally available
+            // after including the script tag above, OR if using modules, they are imported
+            // in your-main-script.js which then calls this setup logic.
+
+            // 1. Get the contentEditable div element.
+            const rteElement = document.getElementById("rich-text-editor");
+
+            // 2. Manually connect the onDeleteKeyUpProtectedLine function to the onkeyup event.
+            // You must do this for every contentEditable div where you want to apply this protective feature.
+            rteElement.onkeyup = onDeleteKeyUpProtectedLine;
+
+            // 3. Get the formatting apply buttons.
+            const redColorBtn = document.getElementById("btn-red-color");
+            const boldBtn = document.getElementById("btn-bold");
+            const largeFontBtn = document.getElementById("btn-large-font");
+
+            // 4. Connect event handlers to call the enrichText function when buttons are clicked.
+            // Since enrichText applies style to the dragged area, it will only be effective if text is dragged when clicked.
+            redColorBtn.onclick = () => enrichText("color", "#FF0000");
+            boldBtn.onclick = () => enrichText("font-weight", "bold"); // Example: Apply bold
+            largeFontBtn.onclick = () => enrichText("font-size", "34px");
+        </script>
+    </body>
+</html>
 ```
