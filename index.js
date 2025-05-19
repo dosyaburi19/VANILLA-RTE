@@ -110,6 +110,71 @@ export function onDeleteKeyUpProtectedLine(event) {
 }
 
 /**
+ * protected line on paste text
+ *
+ * @param {ClipboardEvent} event
+ */
+export function onPasteTextProtectedLine(event) {
+    const selection = window.getSelection() || new Selection();
+    const range = selection.getRangeAt(0);
+
+    const startNode = range.startContainer.childNodes[0].cloneNode(true);
+
+    // 다중 줄 복사 후, 빈 줄에 붙여넣기 시에 오류나기 때문에 만들어둠둠
+    if (startNode && startNode.nodeName === "BR") {
+        event.preventDefault();
+
+        event.clipboardData.items[1].getAsString((htmlText) => {
+            const formattedTextArray = [];
+
+            const formatRegex = /<div[^>]*>(.*?)<\/div>/g;
+            let matchText;
+
+            while ((matchText = formatRegex.exec(htmlText)) !== null) {
+                formattedTextArray.push(matchText[1]);
+            }
+
+            const RootDIV = _getRootDIV(range.startContainer);
+
+            let nextDiv;
+            formattedTextArray.forEach((formattedText, index) => {
+                const div = document.createElement("div");
+                div.innerHTML = formattedText;
+
+                if (div.childNodes.length) {
+                    const newDiv = document.createElement("div");
+
+                    for (const node of div.childNodes) {
+                        let newNode;
+                        if (node.nodeType === Node.TEXT_NODE) {
+                            newNode = document.createTextNode(node.textContent);
+                        } else if (node.nodeName === "SPAN") {
+                            newNode = document.createElement("span");
+                            newNode.textContent = node.textContent;
+                            newNode.style.cssText = node.style.cssText;
+                        } else if (node.nodeName === "BR") {
+                            newNode = document.createElement("br");
+                        }
+
+                        if (newNode) {
+                            newDiv.appendChild(newNode);
+                        }
+                    }
+
+                    if (index === 0) {
+                        RootDIV.parentElement.replaceChild(newDiv, RootDIV);
+                    } else {
+                        nextDiv.insertAdjacentElement("afterend", newDiv);
+                    }
+
+                    nextDiv = newDiv;
+                }
+            });
+        });
+    }
+}
+
+/**
  * enrich text
  *
  * @param {string} styleName
@@ -153,7 +218,6 @@ export function enrichText(styleName, style) {
                 _isSameNode(item, range.startContainer) &&
                 _isSameNode(item, range.endContainer)
             ) {
-                console.log("startEnd");
                 isStart = true;
                 isEnd = true;
 
@@ -211,7 +275,6 @@ export function enrichText(styleName, style) {
             // 여기서부터는 다중 줄 처리
             // 시작 줄 처리 (현재 노드가 range.startContainer 이거나 startContainer.parentElement 일 때)
             else if (_isSameNode(item, range.startContainer)) {
-                console.log("start");
                 isStart = true;
                 isIn = true;
 
@@ -254,7 +317,6 @@ export function enrichText(styleName, style) {
             }
             // 마지막 줄 처리 (현재 노드가 endContainer 이거나 endContainer.parentElement 일 때)
             else if (_isSameNode(item, range.endContainer)) {
-                console.log("end");
                 isEnd = true;
                 isIn = false;
 
@@ -288,7 +350,6 @@ export function enrichText(styleName, style) {
             }
             // 중간 줄 처리
             else if (isIn) {
-                console.log("in");
                 if (item.nodeType === Node.TEXT_NODE) {
                     const span = document.createElement("span");
                     inNodeArr.push(span);
@@ -300,7 +361,6 @@ export function enrichText(styleName, style) {
                     newDiv.appendChild(item);
                 }
             } else {
-                console.log("out");
                 newDiv.appendChild(item);
             }
         }
@@ -311,14 +371,15 @@ export function enrichText(styleName, style) {
             (nextDiv === range.endContainer ||
                 nextDiv.parentElement === range.endContainer)
         ) {
-            console.log("endOffset === 0");
             last = newDiv;
             isEnd = true;
             isIn = false;
         }
 
-        // 줄 단위로 교체
-        RootDIV.parentElement.replaceChild(newDiv, RootDIV);
+        if (newDiv.childNodes.length) {
+            // 줄 단위로 교체
+            RootDIV.parentElement.replaceChild(newDiv, RootDIV);
+        }
     }
 
     // 스타일 적용|해제

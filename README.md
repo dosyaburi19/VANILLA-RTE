@@ -66,6 +66,13 @@ This library provides the following functions that operate on `contentEditable` 
     -   `event` (KeyboardEvent): Keyboard event object passed from the `onkeyup` event handler. This function must receive the event object as an argument.
 -   **How to Use:** You **must manually assign** this function as the `onkeyup` event handler for **each** `contentEditable` div element where you want to apply this protective feature.
 
+#### `onPasteTextProtectedLine(event: ClipboardEvent);`
+
+-   **Role:** This function handles the `onpaste` event for a `contentEditable` element. When the editor has a specific format requiring each line to be composed of a separate `div` element, it processes the pasted content to ensure this format is maintained. Although not strictly required, this function is used to prevent other editor functions (like the `enrich` function) from malfunctioning due to damaged format.
+-   **Parameters:**
+    -   `event` (ClipboardEvent): The paste event object passed from the `onpaste` event handler. This function must receive the event object as an argument.
+-   **How to Use:** This function should be assigned as the `onpaste` event handler to the `contentEditable` element where you want to enforce this specific format (`one line per div`) upon pasting. Please note that when pasting text with complex formatting copied from other websites or external sources, it may not always work as expected or the format may not be perfectly maintained.
+
 ### Full Example
 
 The following is a complete example code showing how to set up HTML, include the library, and actually connect and use the main functions. Through this example, you can understand the basic usage flow of VANILLA-RTE.
@@ -116,6 +123,7 @@ The following is a complete example code showing how to set up HTML, include the
             // 2. Manually connect the onDeleteKeyUpProtectedLine function to the onkeyup event.
             // You must do this for every contentEditable div where you want to apply this protective feature.
             rteElement.onkeyup = onDeleteKeyUpProtectedLine;
+            rteElement.onpaste = onPasteTextProtectedLine;
 
             // 3. Get the formatting apply buttons.
             const redColorBtn = document.getElementById("btn-red-color");

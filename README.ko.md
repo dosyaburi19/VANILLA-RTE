@@ -64,6 +64,13 @@ import { enrichText, onDeleteKeyUpProtectedLine } from "vanilla-rte";
     -   `event` (KeyboardEvent): `onkeyup` 이벤트 핸들러로부터 전달받는 키보드 이벤트 객체. 이 함수는 이벤트 객체를 인자로 받아야 합니다.
 -   **사용 방법:** 이 보호 기능을 적용하고 싶은 **각각의 `contentEditable` div 요소**에 `onkeyup` 이벤트 핸들러로 이 함수를 **수동으로 할당**해주어야 합니다.
 
+#### `onPasteTextProtectedLine(event: ClipboardEvent);`
+
+-   **역할:** `contentEditable` 요소에 대한 `onpaste` 이벤트를 처리하는 함수입니다. 에디터가 각 라인을 별도의 `div` 요소로 구성해야 하는 특정 형식을 가질 때, 사용자가 텍스트를 붙여넣었을 때 이 형식이 유지되도록 붙여넣기된 내용을 처리합니다. 이 함수는 필수 사항은 아니지만, 형식이 손상되어 `enrich` 함수 등 다른 에디터 기능이 정상 작동하지 않는 것을 방지하기 위해 사용됩니다.
+-   **인자:**
+    `event` (ClipboardEvent): `onpaste` 이벤트 핸들러로부터 전달되는 붙여넣기 이벤트 객체입니다. 이 함수는 반드시 이 이벤트 객체를 인자로 받아야 합니다.
+-   **사용 방법:** 이 함수는 붙여넣기 시 해당 특정 형식(`한 라인당 한 div`)을 적용하고자 하는 `contentEditable` 요소의 `onpaste` 이벤트 핸들러로 할당되어야 합니다. 다른 웹사이트나 외부 소스에서 복사된 복잡한 서식의 텍스트를 붙여넣을 경우, 예상대로 작동하지 않거나 형식이 완벽하게 유지되지 않을 수도 있습니다.
+
 ### Full Example
 
 다음은 HTML 설정, 라이브러리 포함, 그리고 주요 함수들을 실제로 연결하여 사용하는 전체 예시 코드입니다. 이 예시를 통해 VANILLA-RTE의 기본적인 사용 흐름을 파악할 수 있습니다.
@@ -112,6 +119,7 @@ import { enrichText, onDeleteKeyUpProtectedLine } from "vanilla-rte";
             // 2. onDeleteKeyUpProtectedLine 함수를 onkeyup 이벤트에 수동으로 연결합니다.
             // 이 보호 기능을 적용하고 싶은 모든 contentEditable div에 대해 이 작업을 해야 합니다.
             rteElement.onkeyup = onDeleteKeyUpProtectedLine;
+            rteElement.onpaste = onPasteTextProtectedLine;
 
             // 3. 서식 적용 버튼들을 가져옵니다.
             const redColorBtn = document.getElementById("btn-red-color");
